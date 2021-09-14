@@ -1,13 +1,17 @@
-# Freemex 2.0
+# Freemex 3.0
 
-A stock market simulation using Node, Express in the backend and VanillaJs in frontend with EJS templating.
+A stock market simulation 📈
+
+## Stack
+| Part      | Stack                                                                                                                                              |
+| :-------- | :------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frontend  | [`React`](https://reactjs.org/), [`Redux`](https://redux.js.org/), [`Node`](https://nodejs.org/)                                                   |
+| Backend   | [`PostgreSQL`](https://www.postgresql.org/), [`Express`](https://expressjs.com/), [`Socket.io`](https://socket.io/), [`Node`](https://nodejs.org/) |
 
 ## Requirements
 
 * node - https://nodejs.org/en/download/
 * npm
-* mongoDB -https://docs.mongodb.com/manual/installation/
-
 
 ## Getting started
 
@@ -18,8 +22,8 @@ A stock market simulation using Node, Express in the backend and VanillaJs in fr
 
 * create .env file and fill it up with required values from .env.example
 
-* get google client id and client secret from https://console.developers.google.com/
-* get facebook client id and client secret from https://developers.facebook.com/
+* get Google client id and client secret from https://console.developers.google.com/
+* get Github client id and client secret from https://github.com/settings/applications/new
 
 * add these credentials to .env file
 
@@ -61,8 +65,8 @@ git push heroku master
 
 ## Glimpses into the project
 
-![](./public/img/screenshots/landing.png)
-![](./public/img/screenshots/portfolio.png)
-![](./public/img/screenshots/market.png)
-![](./public/img/screenshots/transactions.png)
-![](./public/img/screenshots/rules.png)
+![Landing](docs/screenshots/landing.png)
+![Portfolio](docs/screenshots/portfolio.png)
+![Market](docs/screenshots/market.png)
+![Transactions](docs/screenshots/transactions.png)
+![Rules](docs/screenshots/rules.png)
