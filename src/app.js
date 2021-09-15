@@ -16,7 +16,10 @@ const io = socketIO(server, {
   }
 })
 
+const configSequelize = require('./config/sequelize')
+
 const routes = require('./routes')
+const sequelize = require('./models')
 const events = require('./eventHandlers')(io)
 
 const PORT = process.env.PORT || 8000
@@ -38,6 +41,15 @@ const onConnection = (socket) => {
 
 io.on('connection', onConnection)
 
-server.listen(PORT, () => {
-  console.log(`server listenning on ${PORT}`)
-})
+async function main () {
+  try {
+    await configSequelize(sequelize)
+  } catch (error) {
+    console.error('Unable to configure sequelize:', error)
+  }
+  server.listen(PORT, () => {
+    console.log(`server listenning on ${PORT}`)
+  })
+}
+
+main()
