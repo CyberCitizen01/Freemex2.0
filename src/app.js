@@ -1,9 +1,11 @@
 const express = require('express')
 const cors = require('cors')
+const cookieSession = require('cookie-session')
+const passport = require('passport')
+const socketIO = require('socket.io')
+
 const { createServer } = require('http')
 const { join } = require('path')
-
-const socketIO = require('socket.io')
 
 require('dotenv').config()
 
@@ -17,6 +19,7 @@ const io = socketIO(server, {
 })
 
 const configSequelize = require('./config/sequelize')
+const configPassport = require('./config/passport')
 
 const routes = require('./routes')
 const sequelize = require('./models')
@@ -24,15 +27,38 @@ const events = require('./eventHandlers')(io)
 
 const PORT = process.env.PORT || 8000
 
+configPassport()
+
+/**
+ * Middlewares
+ */
 app.use(express.json())
 app.use(express.static(join(__dirname, '../public/')))
-
 app.use(cors({
   origin: process.env.CORS_ORIGINS || '*'
 }))
+app.use(cookieSession({
+  maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
+  keys: [process.env.COOKIE_KEY]
+}))
+app.use(passport.initialize())
+app.use(passport.session())
 
-app.use('/routeA', routes.routeA)
+/**
+ * Routes
+ */
+app.use('/auth', routes.auth)
+app.use('/api/users', routes.users)
+app.use((req, res) => {
+  // TODO - remove this
+  res.status(200).json({
+    message: `GET ${req.originalUrl} success.`
+  })
+})
 
+/**
+ * Socket events
+ */
 const onConnection = (socket) => {
   socket.on('eventA1', events.eventA1)
   socket.on('eventA2', events.eventA2)
@@ -41,6 +67,9 @@ const onConnection = (socket) => {
 
 io.on('connection', onConnection)
 
+/**
+ * Main server
+ */
 async function main () {
   try {
     await configSequelize(sequelize)

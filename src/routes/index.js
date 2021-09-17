@@ -1,3 +1,4 @@
 module.exports = {
-  routeA: require('./routeA')
+  users: require('./users'),
+  auth: require('./auth')
 }
