@@ -1,31 +1,52 @@
 const { DataTypes } = require('sequelize')
 
 /**
- * Define user model.
+ * Define User model.
  * @param {Sequelize} sequelize - Sequelize connection object
  */
 module.exports = (sequelize) => {
-  sequelize.define('user', {
+  sequelize.define('User', {
     uuid: {
       type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4
+      defaultValue: DataTypes.UUIDV4,
+      allowNull: false,
+      unique: true
     },
     username: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true
     },
+    name: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
     email: {
       type: DataTypes.STRING,
       allowNull: false,
       unique: true
     },
-    google_id: {
+    valueInStocks: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      allowNull: false
+    },
+    valueInCash: {
+      type: DataTypes.INTEGER,
+      defaultValue: 50000000,
+      allowNull: false
+    },
+    valueInTotal: {
+      type: DataTypes.INTEGER,
+      defaultValue: 50000000,
+      allowNull: false
+    },
+    googleId: {
       type: DataTypes.STRING
     },
-    github_id: {
+    githubId: {
       type: DataTypes.STRING
     }
   })
-  console.log('Defining user model successful.')
+  console.log('Defining User model successful.')
 }
