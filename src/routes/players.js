@@ -1,53 +1,51 @@
 const { Router } = require('express')
-const { models: { User } } = require('../models')
+const { models: { Player } } = require('../models')
 
 const router = Router()
 
 router.route('/')
   .get((req, res) => {
-    // TODO - Only admins should get all user data fields
+    // Leaderboard
     if (req.query.sort === 'true') {
-      // Leaderboard
-      User.findAll({
+      Player.findAll({
         order: [['valueInTotal', 'DESC']],
         attributes: ['uuid', 'username', 'valueInTotal']
       })
-        .then((users) => {
+        .then((players) => {
           res.status(200).json({
             message: `GET ${req.originalUrl} success.`,
-            users
+            players
           })
         })
         .catch((error) => {
-          console.log('Unable to fetch sorted users:', error)
+          console.log('Unable to fetch sorted players:', error)
           res.status(500).json({
-            message: 'Unable to fetch sorted users',
+            message: 'Unable to fetch sorted players',
             query: req.query
           })
         })
       return
     }
-    // All Users' data
-    let attributes = ['uuid', 'username']
-    if (req.query.admin === 'true') {
-      attributes = undefined
-    }
-    User.findAll({ attributes })
-      .then((users) => {
+
+    // All players with redacted fields
+    Player.findAll({ attributes: ['uuid', 'username'] })
+      .then((players) => {
         res.status(200).json({
           message: `GET ${req.originalUrl} success.`,
-          users
+          players
         })
       })
       .catch((error) => {
-        console.log('Unable to fetch users:', error)
+        console.log('Unable to fetch players:', error)
         res.status(500).json({
-          message: 'Unable to fetch users',
+          message: 'Unable to fetch players',
           query: req.query
         })
       })
   })
+
   .put((req, res) => {
+    // Change username
     if (req.query.scope !== 'username') {
       console.log('Forbidden, only username can be updated.')
       res.status(403).json({
@@ -57,16 +55,15 @@ router.route('/')
       return
     }
 
-    // requires login
     req.user.username = req.body.username
     req.user.save({
       fields: ['username'],
       returning: ['uuid', 'username', 'email']
     })
-      .then((user) => {
+      .then((player) => {
         res.status(200).json({
           message: `PUT ${req.originalUrl} success.`,
-          user
+          player
         })
       })
       .catch((error) => {
@@ -74,33 +71,6 @@ router.route('/')
         res.status(500).json({
           message: 'Unable to update username',
           query: req.query,
-          body: req.body
-        })
-      })
-  })
-  .post((req, res) => {
-    // TODO - Only admins should create users
-    User.create(req.body, {
-      fields: ['uuid', 'username', 'name', 'email']
-    })
-      .then((user) => {
-        res.status(200).json({
-          message: `POST ${req.originalUrl} success.`,
-          user
-        })
-      })
-      .catch((error) => {
-        console.log('Unable to create user instance:', error)
-        if (error.name === 'SequelizeUniqueConstraintError') {
-          res.status(403).json({
-            message: 'Unable to create user instance',
-            details: error.original.detail,
-            body: req.body
-          })
-          return
-        }
-        res.status(500).json({
-          message: 'Unable to create user instance',
           body: req.body
         })
       })

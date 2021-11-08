@@ -1,4 +1,4 @@
 module.exports = {
-  users: require('./users'),
+  players: require('./players'),
   auth: require('./auth')
 }

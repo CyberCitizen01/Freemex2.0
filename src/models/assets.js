@@ -1,11 +1,11 @@
 const { DataTypes } = require('sequelize')
 
 /**
- * Define PlayerStock model.
+ * Define Asset model.
  * @param {Sequelize} sequelize - Sequelize connection object
  */
 module.exports = (sequelize) => {
-  sequelize.define('PlayerStock', {
+  sequelize.define('Asset', {
     quantity: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
@@ -17,5 +17,5 @@ module.exports = (sequelize) => {
       allowNull: false
     }
   })
-  console.log('Defining PlayerStock model successful.')
+  console.log('Defining Asset model successful.')
 }

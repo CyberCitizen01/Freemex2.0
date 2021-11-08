@@ -48,7 +48,7 @@ app.use(passport.session())
  * Routes
  */
 app.use('/auth', routes.auth)
-app.use('/api/users', routes.users)
+app.use('/api/players', routes.players)
 app.use((req, res) => {
   // TODO - remove this
   res.status(200).json({

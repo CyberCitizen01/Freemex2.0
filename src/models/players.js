@@ -1,11 +1,11 @@
 const { DataTypes } = require('sequelize')
 
 /**
- * Define User model.
+ * Define Player model.
  * @param {Sequelize} sequelize - Sequelize connection object
  */
 module.exports = (sequelize) => {
-  sequelize.define('User', {
+  sequelize.define('Player', {
     uuid: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
@@ -48,5 +48,5 @@ module.exports = (sequelize) => {
       type: DataTypes.STRING
     }
   })
-  console.log('Defining User model successful.')
+  console.log('Defining Player model successful.')
 }
