@@ -39,13 +39,20 @@ router.route('/')
           users
         })
       })
+      .catch((error) => {
+        console.log('Unable to fetch users:', error)
+        res.status(500).json({
+          message: 'Unable to fetch users',
+          query: req.query
+        })
+      })
   })
   .put((req, res) => {
     if (req.query.scope !== 'username') {
       console.log('Forbidden, only username can be updated.')
       res.status(403).json({
         message: 'Forbidden, only username can be updated.',
-        query: `scope=${req.query.scope}`
+        query: req.query
       })
       return
     }
@@ -66,7 +73,7 @@ router.route('/')
         console.log('Unable to update username', error)
         res.status(500).json({
           message: 'Unable to update username',
-          query: `scope=${req.query.scope}`,
+          query: req.query,
           body: req.body
         })
       })
