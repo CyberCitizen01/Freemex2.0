@@ -27,17 +27,17 @@ module.exports = (sequelize) => {
       unique: true
     },
     valueInStocks: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.DECIMAL(10, 2),
       defaultValue: 0,
       allowNull: false
     },
     valueInCash: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.DECIMAL(10, 2),
       defaultValue: 50000000,
       allowNull: false
     },
     valueInTotal: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.DECIMAL(10, 2),
       defaultValue: 50000000,
       allowNull: false
     },

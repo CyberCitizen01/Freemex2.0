@@ -9,7 +9,8 @@ const sequelize = new Sequelize(process.env.PG_DB_URI, {
 const modelDefiners = [
   require('./players'),
   require('./assets'),
-  require('./stocks')
+  require('./stocks'),
+  require('./transactions')
 ]
 
 for (const modelDefiner of modelDefiners) {
@@ -17,9 +18,9 @@ for (const modelDefiner of modelDefiners) {
 }
 
 // Define associations
-const { models: { Player, Asset, Stock } } = sequelize
+const { models: { Player, Asset, Stock, Transaction } } = sequelize
 try {
-  // Each player has many assets
+  // Each player can have many assets
   Player.hasMany(Asset, {
     foreignKey: {
       allowNull: false
@@ -34,6 +35,22 @@ try {
     }
   })
   Asset.belongsTo(Stock)
+
+  // Each player can have many transactions
+  Player.hasMany(Transaction, {
+    foreignKey: {
+      allowNull: false
+    }
+  })
+  Transaction.belongsTo(Player)
+
+  // Each transaction is related to one stock
+  Stock.hasMany(Transaction, {
+    foreignKey: {
+      allowNull: false
+    }
+  })
+  Transaction.belongsTo(Stock)
 } catch (error) {
   console.log('Unable to define associations:', error)
 }

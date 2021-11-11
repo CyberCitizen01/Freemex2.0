@@ -17,7 +17,6 @@ const sequelize = require('./models')
 const middlewares = require('./middlewares')
 const { stocksDataFactory } = require('./api/stocks')
 const { periodicUpdate } = require('./utils/sequelize')
-const { serializeDataFromInstances } = require('./utils/fixtures')
 
 const PORT = process.env.PORT || 8000
 const UPDATE_MARKET_INTERVAL = process.env.UPDATE_MARKET_INTERVAL || 30 * 1000 // 30 seconds
@@ -102,10 +101,10 @@ async function main () {
   periodicUpdate(
     UPDATE_MARKET_INTERVAL, stocksDataFactory, sequelize.models.Stock,
     (instances) => {
-      const data = serializeDataFromInstances(instances)
+      const data = instances.map((instance) => instance.toJSON())
       console.log(JSON.stringify(data.map(({ code }) => code)))
       io.emit('market', data)
-      console.log('Stocks updated')
+      console.log(data.length, 'Stocks updated')
     },
     ['name', 'code']
   )

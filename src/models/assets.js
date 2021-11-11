@@ -12,7 +12,7 @@ module.exports = (sequelize) => {
       allowNull: false
     },
     invested: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.DECIMAL(10, 2),
       defaultValue: 0,
       allowNull: false
     }
