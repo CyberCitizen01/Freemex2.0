@@ -75,6 +75,7 @@ async function main () {
     await configSequelize(sequelize)
   } catch (error) {
     console.error('Unable to configure sequelize:', error)
+    process.exit(1)
   }
   server.listen(PORT, () => {
     console.log(`server listenning on ${PORT}`)

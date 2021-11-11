@@ -17,15 +17,15 @@ module.exports = (sequelize) => {
       unique: true
     },
     latestPrice: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.DECIMAL(10, 2),
       allowNull: false
     },
     change: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.DECIMAL(10, 2),
       allowNull: false
     },
     changePercent: {
-      type: DataTypes.INTEGER,
+      type: DataTypes.DECIMAL(10, 5),
       allowNull: false
     },
     latestUpdate: {
