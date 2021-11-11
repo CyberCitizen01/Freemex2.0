@@ -1,4 +1,12 @@
+const { Router } = require('express')
+const router = Router()
+
+router.use('/players', require('./players'))
+// router.use('/assets', require('./assets'))
+// router.use('/transactions', require('./transactions'))
+
 module.exports = {
-  players: require('./players'),
-  auth: require('./auth')
+  auth: require('./auth'),
+  api: router,
+  admin: require('./admin')
 }

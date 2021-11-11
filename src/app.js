@@ -24,6 +24,7 @@ const configPassport = require('./config/passport')
 const routes = require('./routes')
 const sequelize = require('./models')
 const events = require('./eventHandlers')(io)
+const middlewares = require('./middlewares')
 
 const PORT = process.env.PORT || 8000
 
@@ -48,13 +49,8 @@ app.use(passport.session())
  * Routes
  */
 app.use('/auth', routes.auth)
-app.use('/api/players', routes.players)
-app.use((req, res) => {
-  // TODO - remove this
-  res.status(200).json({
-    message: `GET ${req.originalUrl} success.`
-  })
-})
+app.use('/api', middlewares.authenticatePlayer, routes.api)
+app.use('/admin', middlewares.authenticateAdmin, routes.admin)
 
 /**
  * Socket events
