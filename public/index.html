@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="To test Websocket connection and view a realtime update of the stocks, provided we get latest data from the Stocks API and depends on the interval"
+    />
+    <link type="text/plain" rel="author" href="/humans.txt" />
+    <title>Freemex3.0 | admin - Websockets and Stock API healthcheck</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdn.socket.io/3.1.3/socket.io.min.js"
+      integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <div class="d-flex justify-content-center text-center">
+      <div class="table-responsive">
+        <table class="table table-hover table-striped w-auto">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Name</th>
+              <th scope="col">Code</th>
+              <th scope="col">Latest Price</th>
+              <th scope="col">Change</th>
+              <th scope="col">Change Percent</th>
+              <th scope="col">Latest Update</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <tr id="template-row">
+              <th scope="row">...</th>
+              <td class="name">...</td>
+              <td class="code">...</td>
+              <td class="latestPrice">...</td>
+              <td class="change">...</td>
+              <td class="changePercent">...</td>
+              <td class="latestUpdate">...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <script>
+      const socket = io("ws://localhost:8000", {
+        reconnectionAttempts: 5,
+      });
+      socket.on("connect", function () {
+        console.log("connected!!");
+      });
+      socket.on("market", function (data) {
+        console.log(data);
+        updateTable(data);
+      });
+      socket.on("connect_error", function (err) {
+        console.log("connect error:", err.message);
+      });
+      socket.on("disconnect", function () {
+        console.log("Server disconnected");
+      });
+
+      const templateRow = document.getElementById("template-row");
+      const tableBody = document.getElementById("table-body");
+
+      function updateTable(data) {
+        if (data.length === 0) {
+          return;
+        }
+        if (!!tableBody.querySelector("#template-row")) {
+          tableBody.removeChild(templateRow);
+        }
+        const previousRows = tableBody.getElementsByClassName("stock");
+        if (previousRows.length > 0) {
+          for (let i = previousRows.length - 1; i >= 0; i--) {
+            tableBody.removeChild(previousRows[i]);
+          }
+        }
+        data.sort(function (a, b) {
+          return a.code.localeCompare(b.code);
+        });
+        data.forEach(function (entry, index) {
+          const row = templateRow.cloneNode(true);
+          row.id = entry.code;
+          row.classList.add("stock");
+          row.querySelector('th[scope="row"]').innerHTML = index + 1;
+          Object.entries(entry).forEach(function ([className, value]) {
+            if (className === "latestUpdate") {
+              value = new Date(value);
+            }
+            row.querySelector("." + className).innerHTML = value;
+          });
+          tableBody.appendChild(row);
+        });
+      }
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>

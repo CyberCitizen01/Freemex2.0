@@ -23,6 +23,7 @@
     "lint:fix": "standard ./src --fix"
   },
   "dependencies": {
+    "axios": "^0.24.0",
     "cookie-session": "^1.4.0",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",

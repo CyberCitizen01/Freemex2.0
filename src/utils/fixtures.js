@@ -31,4 +31,17 @@ const STOCKS = stockCodesAndNames.map(([code, name]) => (
 ))
 const CODES = stockCodesAndNames.map(([code]) => code)
 
-module.exports = { STOCKS, CODES }
+function serializeDataFromInstances (instances) {
+  return instances.map(({ name, code, latestPrice, change, changePercent, latestUpdate }) => (
+    {
+      name,
+      code,
+      latestPrice,
+      change,
+      changePercent,
+      latestUpdate
+    }
+  ))
+}
+
+module.exports = { STOCKS, CODES, serializeDataFromInstances }
