@@ -40,7 +40,7 @@
           </thead>
           <tbody id="table-body">
             <tr id="template-row">
-              <th scope="row">...</th>
+              <th scope="row" class="id">...</th>
               <td class="name">...</td>
               <td class="code">...</td>
               <td class="latestPrice">...</td>
@@ -88,16 +88,15 @@
           }
         }
         data.sort(function (a, b) {
-          return a.code.localeCompare(b.code);
+          return a.id > b.id
         });
-        data.forEach(function (entry, index) {
+        data.forEach(function (entry) {
           const row = templateRow.cloneNode(true);
           row.id = entry.code;
           row.classList.add("stock");
-          row.querySelector('th[scope="row"]').innerHTML = index + 1;
           Object.entries(entry).forEach(function ([className, value]) {
-            if (className === "latestUpdate") {
-              value = new Date(value);
+            if (className === "latestUpdate" || className === 'updatedAt') {
+              value = new Date(value).toLocaleString();
             }
             row.querySelector("." + className).innerHTML = value;
           });
