@@ -27,21 +27,18 @@ router.route('/')
       return
     }
 
-    // All players with redacted fields
-    Player.findAll({ attributes: ['uuid', 'username'] })
-      .then((players) => {
-        res.status(200).json({
-          message: `GET ${req.originalUrl} success.`,
-          players
-        })
-      })
-      .catch((error) => {
-        console.log('Unable to fetch players:', error)
-        res.status(500).json({
-          message: 'Unable to fetch players',
-          query: req.query
-        })
-      })
+    // Profile of this player
+    res.status(200).json({
+      message: `GET ${req.originalUrl} success.`,
+      player: {
+        ...req.user.toJSON(),
+        id: undefined,
+        googleId: undefined,
+        githubId: undefined,
+        createdAt: undefined,
+        updatedAt: undefined
+      }
+    })
   })
 
   .put((req, res) => {
