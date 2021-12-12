@@ -1,6 +1,9 @@
 const { Router } = require('express')
+const { checkSchedule } = require('../middlewares')
+
 const router = Router()
 
+router.use(checkSchedule)
 router.use('/players', require('./players'))
 router.use('/stocks', require('./stocks'))
 router.use('/assets', require('./assets'))
