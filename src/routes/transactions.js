@@ -86,8 +86,8 @@ router.route('/')
           return
         }
         transaction.netProfit = 0
-        asset.quantity += quantity
-        asset.invested += transactionAmount
+        asset.quantity = parseInt(asset.quantity) + parseInt(quantity)
+        asset.invested = parseFloat(asset.invested) + parseFloat(transactionAmount)
         break
       }
       case 'sold': {
@@ -104,8 +104,8 @@ router.route('/')
         }
         const costBasis = quantity * (asset.invested) / (asset.quantity)
         transaction.netProfit = transactionAmount - costBasis
-        asset.quantity -= quantity
-        asset.invested -= costBasis
+        asset.quantity = parseInt(asset.quantity) - parseInt(quantity)
+        asset.invested = parseFloat(asset.invested) - parseFloat(costBasis)
         break
       }
     }
