@@ -2,8 +2,8 @@ const { Router } = require('express')
 
 const router = Router()
 
-router
-  .get('/', (req, res, next) => {
+router.route('/')
+  .get((req, res, next) => {
     req.user.getAssets({ include: 'Stock' })
       .then((assets) => res.status(200).json({
         message: `GET ${req.originalUrl} success.`,
