@@ -29,6 +29,10 @@ const io = socketIO(server, {
     origin: process.env.CORS_ORIGINS || '*'
   }
 })
+const cookieSessionMiddleware = cookieSession({
+  maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
+  keys: [process.env.COOKIE_KEY]
+})
 
 configPassport()
 
@@ -40,10 +44,7 @@ app.use(express.static(join(__dirname, '../public/')))
 app.use(cors({
   origin: process.env.CORS_ORIGINS || '*'
 }))
-app.use(cookieSession({
-  maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
-  keys: [process.env.COOKIE_KEY]
-}))
+app.use(cookieSessionMiddleware)
 app.use(passport.initialize())
 app.use(passport.session())
 
@@ -76,14 +77,27 @@ async function main () {
    * WEBSOCKETS
    * ==========
    */
+  // Middlewares
+  // Convert a express middleware to a Socket.IO middleware
+  const wrap = middleware => (socket, next) => middleware(socket.request, {}, next)
+  io.use(wrap(cookieSessionMiddleware))
+  io.use(wrap(passport.initialize()))
+  io.use(wrap(passport.session()))
+  io.use((socket, next) => {
+    if (socket.request.user) {
+      next()
+    } else {
+      next(new Error('Unauthorized'))
+    }
+  })
 
   // Keep track of number of Websocket connections
   io.on('connection', (socket) => {
     marketCount++
-    console.log('New Connection', marketCount)
+    console.log(`New connection, marketCount: ${marketCount}`)
     socket.on('disconnect', () => {
       marketCount--
-      console.log('Disconnected', marketCount)
+      console.log(`Disconnected, marketCount: ${marketCount}`)
     })
   })
 
