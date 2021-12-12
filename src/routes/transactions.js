@@ -105,7 +105,7 @@ router.route('/')
         const costBasis = quantity * (asset.invested) / (asset.quantity)
         transaction.netProfit = transactionAmount - costBasis
         asset.quantity -= quantity
-        asset.invested -= transactionAmount
+        asset.invested -= costBasis
         break
       }
     }
