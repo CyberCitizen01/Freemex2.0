@@ -11,7 +11,7 @@
  * @returns Interval from `setInterval`
  */
 function periodicUpdate (ms, factory, model, callback, attributes) {
-  return setInterval(() => {
+  return setInterval((function _interval () {
     model.findAll({ attributes: ['id', ...attributes] })
       .then((instances) => {
         factory(instances)
@@ -39,7 +39,8 @@ function periodicUpdate (ms, factory, model, callback, attributes) {
           .catch(error => console.log(`Unable to get data from ${factory.name}:`, error))
       })
       .catch(error => console.log(`Unable to fetch ${attributes} from DB:`, error))
-  }, ms)
+    return _interval
+  })(), ms)
 }
 
 module.exports = { periodicUpdate }
