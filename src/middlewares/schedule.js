@@ -1,7 +1,14 @@
 const { models: { Schedule } } = require('../models')
 
+const spareRoutes = [
+  /^GET \/api\/players\?sort=true/ // Leaderboard
+]
+
 /**
- * Requests made before and after the event are rejected.
+ * Requests made before and after the event are rejected, except
+ * if the requested route is in `spareRoutes`.
+ *
+ * Though, atleast one entry in Schedule table is required.
  */
 async function checkSchedule (req, res, next) {
   const now = new Date()
@@ -9,18 +16,31 @@ async function checkSchedule (req, res, next) {
   let ended = false
   try {
     const schedule = await Schedule.findOne({
-      order: [['createdAt, DESC']]
+      order: [['createdAt', 'DESC']]
     })
+    if (schedule === null) {
+      res.status(404).json({
+        message: 'No schedule found, please contact admin.'
+      })
+      return
+    }
     if (schedule.start.getTime() <= now.getTime()) {
       started = true
     }
     if (schedule.end.getTime() <= now.getTime()) {
       ended = true
     }
-    req.locals.ctx = {
-      started, ended
-    }
-    if (!started || ended) {
+    req.locals({
+      ctx: {
+        started, ended
+      }
+    })
+    if (
+      !(spareRoutes.some((route) => (
+        route.test(`${req.method} ${req.originalUrl}`)
+      ))) &&
+      (!started || ended)
+    ) {
       res.status(403).json({
         message: 'Forbidden, for the given schedule, ' + (
           ended
@@ -29,11 +49,12 @@ async function checkSchedule (req, res, next) {
         ),
         schedule
       })
+      return
     }
+    next()
   } catch (error) {
     next(error)
   }
-  next()
 }
 
 module.exports = { checkSchedule }

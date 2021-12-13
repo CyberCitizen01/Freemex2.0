@@ -10,7 +10,8 @@ const modelDefiners = [
   require('./players'),
   require('./assets'),
   require('./stocks'),
-  require('./transactions')
+  require('./transactions'),
+  require('./schedules')
 ]
 
 for (const modelDefiner of modelDefiners) {

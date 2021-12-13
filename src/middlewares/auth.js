@@ -1,5 +1,6 @@
 const spareRoutes = [
-  '/api/player?sort=true' // Leaderboard
+  /^GET \/api\/players\?sort=true/, // Leaderboard
+  /^GET \/api\/schedule/ // Schedule
 ]
 
 /**
@@ -8,7 +9,9 @@ const spareRoutes = [
  */
 function player (req, res, next) {
   if (
-    !(spareRoutes.indexOf(req.originalUrl) > -1) &&
+    !(spareRoutes.some((route) => (
+      route.test(`${req.method} ${req.originalUrl}`)
+    ))) &&
     !req.isAuthenticated()
   ) {
     res.status(401).redirect('/')
