@@ -28,26 +28,33 @@ router.get('/github/redirect', passport.authenticate('github', { failureRedirect
   res.redirect('/')
 })
 
-router.get('/admin', (req, res) => {
+router.post('/admin', (req, res) => {
   const { username, password } = req.body
   if (!username || !password) {
     res.clearCookie('__u')
-    res.status(400).redirect('/')
+    res.status(400).json({
+      message: 'Empty username or password',
+      body: req.body
+    })
     return
   }
   let isAdmin = true
-  isAdmin = process.env.ADMIN_USERNAME === username && true
-  isAdmin = process.env.ADMIN_PASSWORD === password && true
+  isAdmin = process.env.ADMIN_USERNAME === username && isAdmin
+  isAdmin = process.env.ADMIN_PASSWORD === password && isAdmin
   if (!isAdmin) {
     res.clearCookie('__u')
-    res.status(401).redirect('/')
+    res.status(401).json({
+      message: 'Unauthorized.'
+    })
     return
   }
   /* eslint-disable new-cap -- ¯\_(ツ)_/¯ built-in */
   const cookie = new Buffer.from(`${username}:${password}`).toString('base64')
   /* eslint-enable new-cap */
-  res.cookie('__u', cookie)
-  res.status(200).redirect('/dashboard')
+  res.cookie('__u', cookie, {
+    maxAge: 2 * 24 * 60 * 60 * 1000 // 2 days
+  })
+  res.redirect(303, '/dashboard')
 })
 
 module.exports = router

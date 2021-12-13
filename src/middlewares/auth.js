@@ -14,7 +14,10 @@ function player (req, res, next) {
     ))) &&
     !req.isAuthenticated()
   ) {
-    res.status(401).redirect('/')
+    res.status(401).json({
+      message: 'Unauthorized.'
+    })
+    return
   }
   next()
 }
@@ -23,12 +26,20 @@ function player (req, res, next) {
  * Admin needs to be authenticated to continue.
  */
 function admin (req, res, next) {
+  if (!req.headers.cookie) {
+    res.status(400).json({
+      message: 'Cookies not found.'
+    })
+    return
+  }
   const cookie = req.headers.cookie
     .split('; ')
     .find((c) => c.startsWith('__u='))
 
   if (!cookie) {
-    res.status(400).redirect('/')
+    res.status(400).json({
+      message: 'Relevant cookie not found, please login.'
+    })
     return
   }
 
@@ -42,11 +53,13 @@ function admin (req, res, next) {
   /* eslint-enable new-cap */
 
   let isAdmin = true
-  isAdmin = process.env.ADMIN_USERNAME === username && true
-  isAdmin = process.env.ADMIN_PASSWORD === password && true
+  isAdmin = process.env.ADMIN_USERNAME === username && isAdmin
+  isAdmin = process.env.ADMIN_PASSWORD === password && isAdmin
   if (!isAdmin) {
     res.clearCookie('__u')
-    res.status(401).redirect('/')
+    res.status(401).json({
+      message: 'Unauthorized.'
+    })
     return
   }
 
