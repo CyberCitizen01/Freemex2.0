@@ -30,11 +30,6 @@ async function checkSchedule (req, res, next) {
     if (schedule.end.getTime() <= now.getTime()) {
       ended = true
     }
-    req.locals({
-      ctx: {
-        started, ended
-      }
-    })
     if (
       !(spareRoutes.some((route) => (
         route.test(`${req.method} ${req.originalUrl}`)
