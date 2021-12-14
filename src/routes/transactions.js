@@ -1,6 +1,8 @@
 const { Router } = require('express')
 const { models: { Transaction, Stock, Asset } } = require('../models')
 
+const NO_SELL_PERIOD = parseInt(process.env.NO_SELL_PERIOD) || 20 * 60 * 1000 // 20 min
+
 const router = Router()
 
 router.route('/')
@@ -73,6 +75,16 @@ router.route('/')
       }
     })
 
+    /**
+     * Forcefully typecast DECIMAL into float (number).
+     * https://github.com/sequelize/sequelize/issues/8019
+     */
+    stock.latestPrice = parseFloat(stock.latestPrice)
+    asset.invested = parseFloat(asset.invested)
+    req.user.valueInCash = parseFloat(req.user.valueInCash)
+    req.user.valueInStocks = parseFloat(req.user.valueInStocks)
+    req.user.valueInTotal = parseFloat(req.user.valueInTotal)
+
     const transactionAmount = stock.latestPrice * quantity
 
     switch (type) {
@@ -86,8 +98,13 @@ router.route('/')
           return
         }
         transaction.netProfit = 0
-        asset.quantity = parseInt(asset.quantity) + parseInt(quantity)
-        asset.invested = parseFloat(asset.invested) + parseFloat(transactionAmount)
+        asset.quantity += quantity
+        asset.invested += transactionAmount
+        req.user.valueInCash -= transactionAmount
+        req.user.valueInStocks += transactionAmount
+        if (!isNew) {
+          transaction.AssetId = asset.id
+        }
         break
       }
       case 'sold': {
@@ -101,16 +118,80 @@ router.route('/')
             query: req.query,
             body: req.body
           })
+          return
         }
+
+        const transactions = await asset.getTransactions({
+          order: [['createdAt', 'DESC']],
+          attributes: [
+            'id', 'quantity', 'createdAt'
+          ]
+        })
+        const popTransactionIds = []
+        const now = (new Date()).getTime()
+        let proxyQuantity = quantity - asset.quantity + (
+          // sum of `quantity` column.
+          transactions.reduce((a, b) => a + b.quantity, 0)
+        )
+
+        /**
+         * Check if the requested quantity of stocks satisfy
+         * the `NO_SELL_PERIOD`, if not terminate the transaction.
+         *
+         * Analogically, pop out transactions from the asset
+         * queue, until atmost `proxyQuantity` quantity of stocks
+         * gets poped
+         * (If there's some non zero quantity of stocks left in a
+         * transaction, then it doesn't pop out, but constitutes to
+         * next `sold` transaction).
+         */
+        for (const _transaction of transactions) {
+          if (
+            proxyQuantity !== 0 &&
+            now < _transaction.createdAt.getTime() + NO_SELL_PERIOD
+          ) {
+            res.status(403).json({
+              message: `Forbidden, at least wait for ${NO_SELL_PERIOD}ms before selling.`,
+              atleastWaitPeriod: (
+                _transaction.createdAt.getTime() + NO_SELL_PERIOD - now
+              )
+            })
+            return
+          }
+          if (proxyQuantity < _transaction.quantity) {
+            break
+          }
+          popTransactionIds.push(_transaction.id)
+          proxyQuantity -= _transaction.quantity
+        }
+        if (popTransactionIds.length > 0) {
+          await Transaction.update({ AssetId: null }, {
+            where: {
+              id: popTransactionIds
+            }
+          })
+        }
+
         const costBasis = quantity * (asset.invested) / (asset.quantity)
         transaction.netProfit = transactionAmount - costBasis
-        asset.quantity = parseInt(asset.quantity) - parseInt(quantity)
-        asset.invested = parseFloat(asset.invested) - parseFloat(costBasis)
+        asset.quantity -= quantity
+        asset.invested -= costBasis
+        req.user.valueInCash += transactionAmount
+        req.user.valueInStocks -= transactionAmount
         break
       }
     }
+
+    req.user.valueInTotal = req.user.valueInCash + req.user.valueInStocks
+
+    await req.user.save()
     await transaction.save()
     await asset.save()
+
+    if (isNew && type === 'bought') {
+      await transaction.setAsset(asset)
+    }
+
     res.status(200).json({
       message: `POST ${req.originalUrl} success.`,
       transaction: {

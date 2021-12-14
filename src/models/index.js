@@ -52,6 +52,27 @@ try {
     }
   })
   Transaction.belongsTo(Stock)
+
+  /**
+   * A transaction being related to an asset
+   * indicates that it's quantity
+   * contributes to the asset's quantity.
+   *
+   * A transaction being in with no relation to
+   * an asset indicates that it is either
+   * not of type `bought` or it's quantity
+   * has no contribution in the asset's
+   * quantity.
+   */
+  // Each asset can have many transactions
+  Asset.hasMany(Transaction, {
+    foreignKey: {
+      // There can be a transaction
+      // with no relation to asset.
+      allowNull: true
+    }
+  })
+  Transaction.belongsTo(Asset)
 } catch (error) {
   console.log('Unable to define associations:', error)
 }
