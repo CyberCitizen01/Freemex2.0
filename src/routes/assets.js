@@ -11,6 +11,7 @@ router.route('/')
           asset: {
             quantity: asset.quantity,
             invested: asset.invested,
+            netProfit: asset.netProfit,
             updatedAt: asset.updatedAt
           },
           Stock: {

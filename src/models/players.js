@@ -1,5 +1,7 @@
 const { DataTypes } = require('sequelize')
 
+const FREECASH = parseInt(process.env.FREECASH) || 50000000
+
 /**
  * Define Player model.
  * @param {Sequelize} sequelize - Sequelize connection object
@@ -33,12 +35,12 @@ module.exports = (sequelize) => {
     },
     valueInCash: {
       type: DataTypes.DECIMAL(10, 2),
-      defaultValue: 50000000,
+      defaultValue: FREECASH,
       allowNull: false
     },
     valueInTotal: {
       type: DataTypes.DECIMAL(10, 2),
-      defaultValue: 50000000,
+      defaultValue: FREECASH,
       allowNull: false
     },
     googleId: {

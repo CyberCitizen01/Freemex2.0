@@ -15,6 +15,11 @@ module.exports = (sequelize) => {
       type: DataTypes.DECIMAL(10, 2),
       defaultValue: 0,
       allowNull: false
+    },
+    netProfit: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0,
+      allowNull: false
     }
   })
   console.log('Defining Asset model successful.')

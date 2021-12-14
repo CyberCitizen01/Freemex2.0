@@ -81,6 +81,7 @@ router.route('/')
      */
     stock.latestPrice = parseFloat(stock.latestPrice)
     asset.invested = parseFloat(asset.invested)
+    asset.netProfit = parseFloat(asset.netProfit)
     req.user.valueInCash = parseFloat(req.user.valueInCash)
     req.user.valueInStocks = parseFloat(req.user.valueInStocks)
     req.user.valueInTotal = parseFloat(req.user.valueInTotal)
@@ -182,6 +183,7 @@ router.route('/')
       }
     }
 
+    asset.netProfit += transaction.netProfit
     req.user.valueInTotal = req.user.valueInCash + req.user.valueInStocks
 
     await req.user.save()
