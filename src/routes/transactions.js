@@ -178,7 +178,7 @@ router.route('/')
         asset.quantity -= quantity
         asset.invested -= costBasis
         req.user.valueInCash += transactionAmount
-        req.user.valueInStocks -= transactionAmount
+        req.user.valueInStocks -= costBasis
         break
       }
     }
