@@ -15,11 +15,11 @@ const configPassport = require('./config/passport')
 const routes = require('./routes')
 const sequelize = require('./models')
 const middlewares = require('./middlewares')
-const { stocksDataFactory } = require('./api/stocks')
-const { periodicUpdate } = require('./utils/sequelize')
+const { periodicUpdate, updateTable } = require('./utils/sequelize')
+const { updatePlayersValue, updatePlayersValueOptions } = require('./utils/misc')
 
 const PORT = process.env.PORT || 8000
-const UPDATE_MARKET_INTERVAL = process.env.UPDATE_MARKET_INTERVAL || 30 * 1000 // 30 seconds
+const STOCKS_UPDATE_INTERVAL = process.env.STOCKS_UPDATE_INTERVAL || 30 * 1000 // 30 seconds
 
 const app = express()
 const server = createServer(app)
@@ -101,17 +101,50 @@ async function main () {
     })
   })
 
-  // Periodically update Stock table from Stocks API.
-  periodicUpdate(
-    UPDATE_MARKET_INTERVAL, stocksDataFactory, sequelize.models.Stock,
-    (instances) => {
-      const data = instances.map((instance) => instance.toJSON())
-      console.log(JSON.stringify(data.map(({ code }) => code)))
-      io.emit('market', data)
-      console.log(data.length, 'Stocks updated')
+  // TODO - Add a route to start this `periodicUpdate` fn.
+  //        so that it executes only when the event is
+  //        active (To spare some resources).
+
+  /**
+   * Periodically update Stock table from Stocks API.
+   * and if there are any players with non zero value
+   * in stocks, then update those players' valueInStocks
+   * and hence valueInTotal, according to the updated
+   * latestPrice of stocks.
+   */
+  periodicUpdate({
+    ms: STOCKS_UPDATE_INTERVAL,
+    factory: [(
+      process.env.USE_FAKE_STOCKS_API === 'true'
+        ? require('./utils/stocksapi').fakeStocksDataFactory
+        : require('./api/stocks').stocksDataFactory
+    )],
+    model: sequelize.models.Stock,
+    options: {
+      attributes: ['id', 'name', 'code', 'latestPrice']
     },
-    ['name', 'code']
-  )
+    callback: (stocks, error) => {
+      if (error) {
+        console.log(error)
+        return
+      }
+      console.log(JSON.stringify(stocks.map(({ code }) => code)))
+      console.log(stocks.length, 'Stocks updated')
+      io.emit('market', JSON.parse(JSON.stringify(stocks)))
+      updateTable({
+        factory: [updatePlayersValue, stocks],
+        model: sequelize.models.Player,
+        options: updatePlayersValueOptions,
+        callback: (players, error) => {
+          if (error) {
+            console.log(error)
+            return
+          }
+          console.log(players.length, 'players updated.')
+        }
+      })
+    }
+  })
 
   /**
    * Main server

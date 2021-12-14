@@ -21,6 +21,8 @@ async function stocksDataFactory (instances) {
   const symbols = instances.map(({ code }) => code)
   const data = await getRawStocksData(symbols)
   const serializedData = []
+  // TODO - Make sure that, `serilizedData` is according to the
+  //        order of `instances`.
   for (const [, { quote: { symbol: code, latestPrice, change, changePercent, latestUpdate } }] of Object.entries(data)) {
     serializedData.push({
       code, latestPrice, change, changePercent, latestUpdate

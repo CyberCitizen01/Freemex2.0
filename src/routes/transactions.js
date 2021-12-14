@@ -186,6 +186,9 @@ router.route('/')
     asset.netProfit += transaction.netProfit
     req.user.valueInTotal = req.user.valueInCash + req.user.valueInStocks
 
+    // TODO - Handle the situation when any errors
+    //        are thrown, by undoing any instances
+    //        that may have been updated.
     await req.user.save()
     await transaction.save()
     await asset.save()
