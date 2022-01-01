@@ -53,7 +53,7 @@ app.use(passport.session())
  */
 app.use('/auth', routes.auth)
 app.use('/api', middlewares.auth.player, routes.api)
-app.use('/admin', middlewares.auth.admin, routes.admin)
+app.use('/admin/api', middlewares.auth.admin, routes.admin)
 
 let marketCount = 0
 
