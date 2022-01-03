@@ -52,9 +52,10 @@ router.post('/admin', (req, res) => {
   const cookie = new Buffer.from(`${username}:${password}`).toString('base64')
   /* eslint-enable new-cap */
   res.cookie('__u', cookie, {
-    maxAge: 2 * 24 * 60 * 60 * 1000 // 2 days
+    maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
+    sameSite: 'strict'
   })
-  res.redirect(303, '/dashboard')
+  res.sendStatus(200)
 })
 
 module.exports = router
