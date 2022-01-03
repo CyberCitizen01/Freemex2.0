@@ -11,20 +11,26 @@ const spareRoutes = [
    */
 ]
 
+router.use((req, res, next) => {
+  if (
+    spareRoutes.some((route) => (
+      route.test(`${req.method} ${req.originalUrl}`)
+    ))
+  ) {
+    res.sendStatus(404)
+    return
+  }
+  next()
+})
+
 for (const [name, model] of Object.entries(models)) {
+  const path = `/${pluralize(name.toLowerCase())}`
   router
-    .use((req, res, next) => {
-      if (
-        spareRoutes.some((route) => (
-          route.test(`${req.method} ${req.originalUrl}`)
-        ))
-      ) {
-        res.sendStatus(404)
-        return
-      }
+    .use(path, (_req, res, next) => {
+      res.locals.name = name
       next()
     })
-    .route(`/${pluralize(name.toLowerCase())}`)
+    .route(path)
     /**
      * TODO - When a stable express 5 realeases, update request
      * handlers to remove try-catch.
@@ -75,29 +81,30 @@ for (const [name, model] of Object.entries(models)) {
       }
       next()
     })
-  router
-    .use((req, res, next) => {
-      if (res.locals.body) {
-        res.status(200).json({
-          message: `${req.method} ${req.originalUrl} success.`,
-          [name]: res.locals.body
-        })
-        return
-      }
-      res.sendStatus(404)
-    })
-    .use((err, req, res, next) => {
-      // Handle known errors, or pass on to next error handler.
-      if (err.name === 'SequelizeUniqueConstraintError') {
-        res.status(403).json({
-          message: `Unable to create ${name} instance`,
-          details: [err.original.detail] || err.errors.map(({ message }) => message),
-          body: req.body
-        })
-        return
-      }
-      next(err)
-    })
 }
+
+router
+  .use((req, res) => {
+    if (res.locals.name && res.locals.body) {
+      res.status(200).json({
+        message: `${req.method} ${req.originalUrl} success.`,
+        [res.locals.name]: res.locals.body
+      })
+      return
+    }
+    res.sendStatus(404)
+  })
+  .use((err, req, res, next) => {
+    // Handle known errors, or pass on to next error handler.
+    if (err.name === 'SequelizeUniqueConstraintError') {
+      res.status(403).json({
+        message: `Unable to create ${res.locals.name} instance`,
+        details: [err.original.detail] || err.errors.map(({ message }) => message),
+        body: req.body
+      })
+      return
+    }
+    next(err)
+  })
 
 module.exports = router
