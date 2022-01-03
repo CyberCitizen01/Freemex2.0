@@ -3,6 +3,10 @@ const { checkSchedule } = require('../middlewares')
 
 const router = Router()
 
+router.get('/ping', (_req, res) => {
+  res.status(200).send('pong')
+})
+
 router.use('/schedule', require('./schedules'))
 router.use(checkSchedule)
 router.use('/players', require('./players'))

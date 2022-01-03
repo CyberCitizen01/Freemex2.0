@@ -11,6 +11,10 @@ const spareRoutes = [
    */
 ]
 
+router.get('/ping', (_req, res) => {
+  res.status(200).send('pong')
+})
+
 router.use((req, res, next) => {
   if (
     spareRoutes.some((route) => (
