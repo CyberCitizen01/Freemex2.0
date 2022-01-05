@@ -1,6 +1,6 @@
 const spareRoutes = [
   /^GET \/api\/players\?sort=true/, // Leaderboard
-  /^GET \/api\/schedule/ // Schedule
+  /^GET \/api\/schedules/ // Schedule
 ]
 
 /**

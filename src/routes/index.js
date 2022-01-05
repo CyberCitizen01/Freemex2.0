@@ -7,7 +7,7 @@ router.get('/ping', (_req, res) => {
   res.status(200).send('pong')
 })
 
-router.use('/schedule', require('./schedules'))
+router.use('/schedules', require('./schedules'))
 router.use(checkSchedule)
 router.use('/players', require('./players'))
 router.use('/stocks', require('./stocks'))
