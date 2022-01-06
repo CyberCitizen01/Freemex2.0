@@ -123,7 +123,7 @@ router.route('/')
         }
 
         const transactions = await asset.getTransactions({
-          order: [['createdAt', 'DESC']],
+          order: [['createdAt', 'ASC']],
           attributes: [
             'id', 'quantity', 'createdAt'
           ]
