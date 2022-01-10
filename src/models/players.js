@@ -16,8 +16,7 @@ module.exports = (sequelize) => {
     },
     username: {
       type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
+      allowNull: false
     },
     name: {
       type: DataTypes.STRING,
@@ -25,8 +24,7 @@ module.exports = (sequelize) => {
     },
     email: {
       type: DataTypes.STRING,
-      allowNull: false,
-      unique: true
+      allowNull: false
     },
     valueInStocks: {
       type: DataTypes.DECIMAL(10, 2),
