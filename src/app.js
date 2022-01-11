@@ -80,17 +80,17 @@ async function main () {
    */
   // Middlewares
   // Convert a express middleware to a Socket.IO middleware
-  const wrap = middleware => (socket, next) => middleware(socket.request, {}, next)
-  io.use(wrap(cookieSessionMiddleware))
-  io.use(wrap(passport.initialize()))
-  io.use(wrap(passport.session()))
-  io.use((socket, next) => {
-    if (socket.request.user) {
-      next()
-    } else {
-      next(new Error('Unauthorized'))
-    }
-  })
+  // const wrap = middleware => (socket, next) => middleware(socket.request, {}, next)
+  // io.use(wrap(cookieSessionMiddleware))
+  // io.use(wrap(passport.initialize()))
+  // io.use(wrap(passport.session()))
+  // io.use((socket, next) => {
+  //   if (socket.request.user) {
+  //     next()
+  //   } else {
+  //     next(new Error('Unauthorized'))
+  //   }
+  // })
 
   // Keep track of number of Websocket connections
   io.on('connection', (socket) => {
