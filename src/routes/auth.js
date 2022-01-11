@@ -53,6 +53,7 @@ router.post('/admin', (req, res) => {
   /* eslint-enable new-cap */
   res.cookie('__u', cookie, {
     maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
+    domain: (new URL(process.env.DOMAIN_NAME)).hostname,
     sameSite: 'strict'
   })
   res.sendStatus(200)

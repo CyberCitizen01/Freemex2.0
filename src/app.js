@@ -32,6 +32,7 @@ const io = socketIO(server, {
 const cookieSessionMiddleware = cookieSession({
   maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
   sameSite: 'strict',
+  domain: (new URL(process.env.DOMAIN_NAME)).hostname,
   keys: [process.env.COOKIE_KEY]
 })
 
