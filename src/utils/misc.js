@@ -25,8 +25,12 @@ const updatePlayersValueOptions = {
 }
 
 async function updatePlayersValue (players, stocks) {
+  stocks = stocks.map((stock) => ({
+    ...stock.toJSON(), latestPrice: parseFloat(stock.latestPrice)
+  }))
   for (const player of players) {
     player.valueInStocks = 0
+    player.valueInCash = parseFloat(player.valueInCash)
     for (const asset of player.Assets) {
       const stock = stocks.find(stock => stock.id === asset.StockId)
       player.valueInStocks += stock.latestPrice * asset.quantity
