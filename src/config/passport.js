@@ -28,33 +28,22 @@ module.exports = () => {
       callbackURL: `${process.env.DOMAIN_NAME}/auth/google/redirect`
     },
     (accessToken, refreshToken, profile, done) => {
-      Player.findOne({
-        where: { googleId: profile.id }
+      Player.findOrCreate({
+        where: { googleId: profile.id },
+        defaults: {
+          username: profile.displayName,
+          name: `${profile.name.givenName} ${profile.name.familyName}`,
+          avatar: profile.photos[0].value,
+          email: profile.emails[0].value
+        }
       })
-        .then((player) => {
-          if (player === null) {
-            Player.create({
-              username: profile.displayName,
-              name: `${profile.name.givenName} ${profile.name.familyName}`,
-              email: profile._json.email,
-              googleId: profile.id
-            })
-              .then((player) => {
-                done(null, player)
-                console.log('Google player created')
-              })
-              .catch((error) => {
-                done(error)
-                console.log('Unable to create google player', error)
-              })
-          } else {
-            done(null, player)
-            console.log('Already present')
-          }
+        .then(([player, isNew]) => {
+          done(null, player)
+          if (isNew) console.log('New Google player created')
         })
         .catch((error) => {
           done(error)
-          console.log('Unable to query for player.', error)
+          console.log('Unable to find or create player (Google)', error)
         })
     })
   )
@@ -67,33 +56,22 @@ module.exports = () => {
       scope: ['user:email', 'user:profile']
     },
     (accessToken, refreshToken, profile, done) => {
-      Player.findOne({
-        where: { githubId: profile.id }
+      Player.findOrCreate({
+        where: { githubId: profile.id },
+        defaults: {
+          username: profile.username,
+          name: profile.displayName || profile.username,
+          avatar: profile.photos[0].value,
+          email: profile.emails[0].value
+        }
       })
-        .then((player) => {
-          if (player === null) {
-            Player.create({
-              username: profile.username,
-              name: `${profile.username}`,
-              email: profile.emails[0].value,
-              githubId: profile.id
-            })
-              .then((player) => {
-                done(null, player)
-                console.log('Github player created')
-              })
-              .catch((error) => {
-                done(error)
-                console.log('Unable to create github player', error)
-              })
-          } else {
-            done(null, player)
-            console.log('Already present')
-          }
+        .then(([player, isNew]) => {
+          done(null, player)
+          if (isNew) console.log('New Github player created')
         })
         .catch((error) => {
           done(error)
-          console.log('Unable to query for player.', error)
+          console.log('Unable to find or create player (Github)', error)
         })
     })
   )
