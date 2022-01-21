@@ -46,7 +46,14 @@ router.route('/')
     const type = req.query.type
     const code = req.body.code
     const quantity = parseInt(req.body.quantity)
-
+    if (quantity <= 0 || !Number.isInteger(Number(req.body.quantity))) {
+      res.status(403).json({
+        message: 'Only positive integer value for quantity are supported',
+        query: req.query,
+        body: req.body
+      })
+      return
+    }
     const stock = await Stock.findOne({
       attributes: ['id', 'latestPrice'],
       where: {

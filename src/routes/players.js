@@ -52,7 +52,7 @@ router.route('/')
       return
     }
 
-    const { username } = req.body
+    const { username = '' } = req.body
     if (username.length < 5) {
       res.status(400).json({
         message: 'Username should be of atleast 5 characters.',
@@ -63,7 +63,7 @@ router.route('/')
     req.user.username = username
     req.user.save({
       fields: ['username'],
-      returning: ['uuid', 'username', 'email']
+      returning: ['uuid', 'username']
     })
       .then((player) => {
         res.status(200).json({
