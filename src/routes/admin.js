@@ -72,7 +72,7 @@ for (const [name, model] of Object.entries(models)) {
     })
     .delete(async (req, res, next) => {
       try {
-        const { options } = req.body
+        const { options = {} } = req.body
         /**
          * To prevent destroy everything, refer:
          * https://sequelize.org/v6/manual/model-querying-basics.html#simple-delete-queries
