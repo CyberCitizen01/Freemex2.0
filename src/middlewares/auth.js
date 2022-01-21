@@ -46,7 +46,7 @@ function admin (req, res, next) {
   /* eslint-disable new-cap -- ¯\_(ツ)_/¯ built-in */
   const [username, password] = (
     new Buffer
-      .from(cookie.split('=')[1], 'base64')
+      .from(decodeURIComponent(cookie.split('=')[1]), 'base64')
       .toString()
       .split(':')
   )
