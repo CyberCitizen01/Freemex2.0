@@ -9,7 +9,7 @@ router.route('/')
     if (req.query.sort === 'true') {
       Player.findAll({
         order: [['valueInTotal', 'DESC']],
-        attributes: ['uuid', 'username', 'valueInTotal']
+        attributes: ['uuid', 'avatar', 'username', 'valueInTotal']
       })
         .then((players) => {
           res.status(200).json({
