@@ -1,7 +1,9 @@
 const { models: { Schedule } } = require('../models')
 
 const spareRoutes = [
-  /^GET \/api\/players\?sort=true/ // Leaderboard
+  /**
+   * Add routes (RegEx) to exclude.
+   */
 ]
 
 /**

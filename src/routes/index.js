@@ -8,8 +8,8 @@ router.get('/ping', (_req, res) => {
 })
 
 router.use('/schedules', require('./schedules'))
-router.use(checkSchedule)
 router.use('/players', require('./players'))
+router.use(checkSchedule)
 router.use('/stocks', require('./stocks'))
 router.use('/assets', require('./assets'))
 router.use('/transactions', require('./transactions'))
