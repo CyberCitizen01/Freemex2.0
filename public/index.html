@@ -21,8 +21,14 @@
       integrity="sha384-cPwlPLvBTa3sKAgddT6krw0cJat7egBga3DJepJyrLl4Q9/5WLra3rrnMcyTyOnh"
       crossorigin="anonymous"
     ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
+      crossorigin="anonymous"
+    ></script>
   </head>
   <body>
+    <!-- Stocks Table -->
     <div class="d-flex justify-content-center text-center">
       <div class="table-responsive">
         <table class="table table-hover table-striped w-auto">
@@ -53,26 +59,85 @@
         </table>
       </div>
     </div>
-    <script>
-      const socket = io("ws://localhost:8000", {
-        reconnectionAttempts: 5,
-      });
-      socket.on("connect", function () {
-        console.log("connected!!");
-      });
-      socket.on("market", function (data) {
-        console.log(data);
-        updateTable(data);
-      });
-      socket.on("connect_error", function (err) {
-        console.log("connect error:", err.message);
-      });
-      socket.on("disconnect", function () {
-        console.log("Server disconnected");
-      });
 
+    <!-- Websocket URI Modal -->
+    <div class="modal" id="modal-websocket">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Websocket Connection</h5>
+          </div>
+          <div class="modal-body">
+            <div class="row">
+              <div class="form-group w-50">
+                <input
+                  type="text"
+                  class="form-control"
+                  id="websocketURI"
+                  title="Websocket URI to connect"
+                  required>
+              </div>
+              <div class="form-group w-25">
+                <input
+                  type="number"
+                  class="form-control"
+                  id="websocketReconnectionAttempts"
+                  min="5"
+                  value="5"
+                  title="No. of Reconnection Attempts"
+                  required>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" id="connectWebsocket">Connect</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+      const websocketURIInput = document.getElementById('websocketURI');
       const templateRow = document.getElementById("template-row");
       const tableBody = document.getElementById("table-body");
+
+      websocketURIInput.defaultValue = window.location.origin.replace('http', 'ws');
+
+      const modalForWebsocket = new bootstrap.Modal(
+        document.getElementById('modal-websocket'),
+        {
+          backdrop: 'static',
+          keyboard: false
+        }
+      );
+      modalForWebsocket.toggle();
+
+      document.getElementById('connectWebsocket')
+        .onclick = function () {
+          const uri = websocketURIInput.value
+          const reconnectionAttempts = document.getElementById('websocketReconnectionAttempts').value
+          initWebsocket(uri, reconnectionAttempts)
+          modalForWebsocket.toggle();
+        }
+
+      function initWebsocket(uri, reconnectionAttempts) {
+        console.log('x', reconnectionAttempts);
+        const socket = io(uri, {
+        reconnectionAttempts
+      });
+        socket.on("connect", function () {
+          console.log("connected!!");
+        });
+        socket.on("market", function (data) {
+          console.log(data);
+          updateTable(data);
+        });
+        socket.on("connect_error", function (err) {
+          console.log("connect error:", err.message);
+        });
+        socket.on("disconnect", function () {
+          console.log("Server disconnected");
+        });
+      }
 
       function updateTable(data) {
         if (data.length === 0) {
@@ -88,7 +153,10 @@
           }
         }
         data.sort(function (a, b) {
-          return a.id > b.id
+          if (a.id === b.id) {
+            return 0;
+          }
+          return a.id < b.id ? -1: 1;
         });
         data.forEach(function (entry) {
           const row = templateRow.cloneNode(true);
@@ -104,10 +172,5 @@
         });
       }
     </script>
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"
-      crossorigin="anonymous"
-    ></script>
   </body>
 </html>
