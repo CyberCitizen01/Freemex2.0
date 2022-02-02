@@ -41,7 +41,7 @@ router.route('/')
     })
   })
 
-  .put((req, res) => {
+  .put(async (req, res) => {
     // Change username
     if (req.query.scope !== 'username') {
       console.log('Forbidden, only username can be updated.')
@@ -60,33 +60,36 @@ router.route('/')
       })
       return
     }
-    req.user.username = username
-    req.user.save({
-      fields: ['username'],
-      returning: ['uuid', 'username']
+    const existingPlayer = await Player.findOne({
+      where: {
+        username
+      },
+      attributes: ['username']
     })
-      .then((player) => {
-        res.status(200).json({
-          message: `PUT ${req.originalUrl} success.`,
-          player
-        })
+    if (existingPlayer !== null) {
+      res.status(400).json({
+        message: 'Username should be unique.',
+        body: req.body
       })
-      .catch((error) => {
-        console.log('Unable to update username', error)
-        if (error.name === 'SequelizeUniqueConstraintError') {
-          res.status(500).json({
-            message: 'Username should be unique.',
-            details: [error.original.detail] || error.errors.map(({ message }) => message),
-            body: req.body
-          })
-          return
-        }
-        res.status(500).json({
-          message: 'Unable to update username',
-          query: req.query,
-          body: req.body
-        })
+      return
+    }
+    req.user.username = username
+    try {
+      const player = await req.user.save({
+        fields: ['username']
       })
+      res.status(200).json({
+        message: `PUT ${req.originalUrl} success.`,
+        player
+      })
+    } catch (error) {
+      console.log('Unable to update username', error)
+      res.status(500).json({
+        message: 'Unable to update username',
+        query: req.query,
+        body: req.body
+      })
+    }
   })
 
 module.exports = router
