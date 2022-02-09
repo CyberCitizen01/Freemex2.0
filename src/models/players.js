@@ -30,17 +30,17 @@ module.exports = (sequelize) => {
       allowNull: false
     },
     valueInStocks: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.DECIMAL(16, 2),
       defaultValue: 0,
       allowNull: false
     },
     valueInCash: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.DECIMAL(16, 2),
       defaultValue: FREECASH,
       allowNull: false
     },
     valueInTotal: {
-      type: DataTypes.DECIMAL(10, 2),
+      type: DataTypes.DECIMAL(16, 2),
       defaultValue: FREECASH,
       allowNull: false
     },
