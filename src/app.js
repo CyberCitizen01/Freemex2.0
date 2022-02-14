@@ -16,10 +16,22 @@ const routes = require('./routes')
 const sequelize = require('./models')
 const middlewares = require('./middlewares')
 const { periodicUpdate, updateTable } = require('./utils/sequelize')
-const { updatePlayersValue, updatePlayersValueOptions } = require('./utils/misc')
+const {
+  updatePlayersValue, updatePlayersValueOptions, inTradingHrs
+} = require('./utils/misc')
 
 const PORT = process.env.PORT || 8000
 const STOCKS_UPDATE_INTERVAL = process.env.STOCKS_UPDATE_INTERVAL || 30 * 1000 // 30 seconds
+// NOTE: Below, only time(HH:mm:ss.sssZ) matters i.e. date(YYYY-MM-DD) can be anything.
+const NASDAQ_TRADING_HOURS_START = (
+  new Date(process.env.NASDAQ_TRADING_HOURS_START || 'March 3, 2022 19:00:00+05:30')
+)
+const NASDAQ_TRADING_HOURS_END = (
+  new Date(process.env.NASDAQ_TRADING_HOURS_END || 'March 6, 2022 01:30:00+05:30')
+)
+const NASDAQ_TRADING_HOURS_OFFSET = (
+  new Date(process.env.NASDAQ_TRADING_HOURS_OFFSET || 2 * 60 * 1000) // 2 minutes
+)
 
 const app = express()
 const server = createServer(app)
@@ -116,14 +128,30 @@ async function main () {
    */
   periodicUpdate({
     ms: STOCKS_UPDATE_INTERVAL,
+    conditions: [
+      () => {
+        if (inTradingHrs({
+          start: NASDAQ_TRADING_HOURS_START,
+          end: NASDAQ_TRADING_HOURS_END,
+          offset: NASDAQ_TRADING_HOURS_OFFSET
+        })) {
+          console.log('In trading hours...')
+          return true
+        }
+        console.log('Not in trading hours.')
+        return false
+      }
+    ],
     factory: [(
       process.env.USE_FAKE_STOCKS_API === 'true'
         ? require('./utils/stocksapi').fakeStocksDataFactory
         : require('./api/stocks').stocksDataFactory
     )],
-    model: sequelize.models.Stock,
-    options: {
-      attributes: ['id', 'name', 'code', 'latestPrice']
+    model: {
+      model: sequelize.models.Stock,
+      options: {
+        attributes: ['id', 'name', 'code', 'latestPrice']
+      }
     },
     callback: (stocks, error) => {
       if (error) {
@@ -135,8 +163,10 @@ async function main () {
       io.emit('market', JSON.parse(JSON.stringify(stocks)))
       updateTable({
         factory: [updatePlayersValue, stocks],
-        model: sequelize.models.Player,
-        options: updatePlayersValueOptions,
+        model: {
+          model: sequelize.models.Player,
+          options: updatePlayersValueOptions
+        },
         callback: (players, error) => {
           if (error) {
             console.log(error)

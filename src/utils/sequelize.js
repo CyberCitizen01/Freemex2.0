@@ -7,12 +7,17 @@
  * @param {Object} params[].factory
  * @param {promise} params[].factory.factory
  * @param {Array} params[].factory.factoryParams
- * @param {Model} params[].model
+ * @param {Object} params[].model
+ * @param {Model} params[].model.model
+ * @param {Object} params[].model.options  - To pass as `options`, i.e. `model.findAll(options)`
  * @param {function} params[].callback
- * @param {Object} params[].options  - To pass as `options`, i.e. `model.findAll(options)`
  */
 function updateTable (params) {
-  const { factory: [factory, ...factoryParams], model, callback, options } = params
+  const {
+    factory: [factory, ...factoryParams],
+    model: { model, options },
+    callback
+  } = params
   model.findAll(options)
     .then((instances) => {
       if (instances.length === 0) {
@@ -43,7 +48,7 @@ function updateTable (params) {
         })
         .catch(error => console.log(`Unable to get data from ${factory.name}:`, error))
     })
-    // .catch(error => console.log('Unable to fetch from DB:', error))
+    .catch(error => console.log('Unable to fetch from DB:', error))
 }
 
 /**
@@ -55,17 +60,22 @@ function updateTable (params) {
  *
  * @param {Object[]} params
  * @param {number} params[].ms
+ * @param {Array<function>} params[].conditions
  * @param {Object} params[].factory
  * @param {promise} params[].factory.factory
  * @param {Array} params[].factory.factoryParams
- * @param {Model} params[].model
+ * @param {Object} params[].model
+ * @param {Model} params[].model.model
+ * @param {Object} params[].model.options  - To pass as `options`, i.e. `model.findAll(options)`
  * @param {function} params[].callback
- * @param {Object} params[].options  - To pass as `options`, i.e. `model.findAll(options)`
  * @returns Interval from `setInterval`
  */
 function periodicUpdate (params) {
-  const { ms } = params
+  const { ms, conditions } = params
   return setInterval((function _interval () {
+    for (const condition of conditions) {
+      if (!condition()) return _interval
+    }
     updateTable(params)
     return _interval
   })(), ms)
