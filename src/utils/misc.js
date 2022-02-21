@@ -40,15 +40,28 @@ async function updatePlayersValue (players, stocks) {
   return players
 }
 
-function inTradingHrs ({ start, end, offset }) {
+function inBetween ({ start, end, offset }, { onlyHrs = false } = {}) {
   const day = 24 * 60 * 60 * 1000
-  const now = new Date()
+  let now = new Date()
+
+  now = now.getTime()
+  start = start.getTime()
+  end = end.getTime()
+
+  offset = offset.getTime() % day
+
+  if (onlyHrs) {
+    now = now % day
+    start = start % day
+    end = end % day
+    offset = offset % day
+  }
 
   if (
     (
-      (start.getTime() % day) - (offset.getTime() % day) < (now.getTime() % day)
+      start - offset < now
     ) && (
-      (now.getTime() % day) < (end.getTime() % day) + (offset.getTime() % day)
+      now < end + offset
     )
   ) {
     return true
@@ -60,5 +73,5 @@ module.exports = {
   updatePlayersValue,
   updatePlayersValueOptions,
 
-  inTradingHrs
+  inBetween
 }

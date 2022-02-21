@@ -17,17 +17,26 @@ const sequelize = require('./models')
 const middlewares = require('./middlewares')
 const { periodicUpdate, updateTable } = require('./utils/sequelize')
 const {
-  updatePlayersValue, updatePlayersValueOptions, inTradingHrs
+  updatePlayersValue, updatePlayersValueOptions, inBetween
 } = require('./utils/misc')
 
 const PORT = process.env.PORT || 8000
 const STOCKS_UPDATE_INTERVAL = process.env.STOCKS_UPDATE_INTERVAL || 30 * 1000 // 30 seconds
+const SCHEDULE_START = (
+  new Date(process.env.SCHEDULE_START || 'Feb 28, 2022 19:00:00+05:30')
+)
+const SCHEDULE_END = (
+  new Date(process.env.SCHEDULE_END || 'Mar 3, 2022 01:30:00+05:30')
+)
+const SCHEDULE_OFFSET = (
+  new Date(process.env.SCHEDULE_OFFSET || 2 * 60 * 1000) // 2 minutes
+)
 // NOTE: Below, only time(HH:mm:ss.sssZ) matters i.e. date(YYYY-MM-DD) can be anything.
 const NASDAQ_TRADING_HOURS_START = (
-  new Date(process.env.NASDAQ_TRADING_HOURS_START || 'March 3, 2022 19:00:00+05:30')
+  new Date(process.env.NASDAQ_TRADING_HOURS_START || 'Mar 3, 2022 19:00:00+05:30')
 )
 const NASDAQ_TRADING_HOURS_END = (
-  new Date(process.env.NASDAQ_TRADING_HOURS_END || 'March 6, 2022 01:30:00+05:30')
+  new Date(process.env.NASDAQ_TRADING_HOURS_END || 'Mar 6, 2022 01:30:00+05:30')
 )
 const NASDAQ_TRADING_HOURS_OFFSET = (
   new Date(process.env.NASDAQ_TRADING_HOURS_OFFSET || 2 * 60 * 1000) // 2 minutes
@@ -130,15 +139,27 @@ async function main () {
     ms: STOCKS_UPDATE_INTERVAL,
     conditions: [
       () => {
-        if (inTradingHrs({
+        if (inBetween({
           start: NASDAQ_TRADING_HOURS_START,
           end: NASDAQ_TRADING_HOURS_END,
           offset: NASDAQ_TRADING_HOURS_OFFSET
-        })) {
+        }, { onlyHrs: true })) {
           console.log('In trading hours...')
           return true
         }
         console.log('Not in trading hours.')
+        return false
+      },
+      () => {
+        if (inBetween({
+          start: SCHEDULE_START,
+          end: SCHEDULE_END,
+          offset: SCHEDULE_OFFSET
+        })) {
+          console.log('In schedule...')
+          return true
+        }
+        console.log('Not in schedule.')
         return false
       }
     ],
