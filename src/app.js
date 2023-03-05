@@ -4,8 +4,17 @@ const cookieSession = require('cookie-session')
 const passport = require('passport')
 const socketIO = require('socket.io')
 
-const { createServer } = require('http')
+let { createServer } = require('http')
+let options = {}
 const { join } = require('path')
+if (process.env.NODE_ENV === 'development') {
+  createServer = require('https').createServer
+  const fs = require('fs')
+  options = {
+    key: fs.readFileSync(join(__dirname, '../localhost-key.pem')),
+    cert: fs.readFileSync(join(__dirname, '../localhost.pem')),
+  }  
+}
 
 require('dotenv').config()
 
@@ -43,7 +52,7 @@ const NASDAQ_TRADING_HOURS_OFFSET = (
 )
 
 const app = express()
-const server = createServer(app)
+const server = createServer(options, app)
 const io = socketIO(server, {
   serveClient: false,
   cors: {
@@ -52,7 +61,8 @@ const io = socketIO(server, {
 })
 const cookieSessionMiddleware = cookieSession({
   maxAge: 2 * 24 * 60 * 60 * 1000, // 2 days
-  sameSite: 'strict',
+  sameSite: 'none',
+  secure: true,
   domain: (new URL(process.env.DOMAIN_NAME)).hostname,
   keys: [process.env.COOKIE_KEY]
 })
@@ -65,6 +75,11 @@ configPassport()
 app.use(express.json())
 app.use(express.static(join(__dirname, '../public/')))
 app.use(cors({
+  credentials: true,
+  allowedHeaders: [
+    'Origin', 'X-Requested-With', 'Content-Type',
+    'Accept'
+  ],
   origin: process.env.CORS_ORIGINS || '*'
 }))
 app.use(cookieSessionMiddleware)

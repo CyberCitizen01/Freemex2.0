@@ -19,6 +19,9 @@ data
 .env.test
 .env.production
 
+# pem files
+*.pem
+
 # Runtime data
 pids
 *.pid

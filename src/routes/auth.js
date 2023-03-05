@@ -5,7 +5,7 @@ const router = Router()
 
 router.get('/logout', (req, res) => {
   if (req.user) { req.logout() }
-  res.redirect('/')
+  res.redirect(`${process.env.CORS_ORIGINS}`)
 })
 
 router.get('/google', passport.authenticate(
@@ -15,7 +15,7 @@ router.get('/google', passport.authenticate(
   }
 ))
 router.get('/google/redirect', passport.authenticate('google', { failureRedirect: '/login' }), (_req, res) => {
-  res.redirect('/')
+  res.redirect(`${process.env.CORS_ORIGINS}`)
 })
 
 router.get('/github', passport.authenticate(
@@ -25,7 +25,7 @@ router.get('/github', passport.authenticate(
   }
 ))
 router.get('/github/redirect', passport.authenticate('github', { failureRedirect: '/login' }), (_req, res) => {
-  res.redirect('/')
+  res.redirect(`${process.env.CORS_ORIGINS}`)
 })
 
 router.post('/admin', (req, res) => {
